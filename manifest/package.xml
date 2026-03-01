@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+<manifest xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>LeadScoringService</members>
         <members>LeadScoringServiceTest</members>
         <name>ApexClass</name>
     </types>
-    <version>62.0</version>
-</Package>
+    <types>
+        <members>Lead.Score__c</members>
+        <name>CustomField</name>
+    </types>
+    <version>59.0</version>
+</manifest>
