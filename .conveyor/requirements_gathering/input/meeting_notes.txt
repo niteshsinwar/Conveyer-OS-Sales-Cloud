@@ -1,0 +1,31 @@
+Meeting Notes - Sales Cloud Requirements Discussion
+Date: March 1, 2026
+Attendees: John (Sales VP), Sarah (Sales Manager), Mike (IT)
+
+1. Lead Management Requirements:
+   - Need automated lead scoring based on engagement
+   - Lead assignment rules by territory
+   - Web-to-Lead capture from website
+   - Lead conversion tracking to Opportunities
+
+2. Opportunity Management:
+   - Sales stages: Qualification, Needs Analysis, Proposal, Negotiation, Closed Won/Lost
+   - Opportunity products with price books
+   - Competitor tracking on opportunities
+   - Expected close date alerts
+
+3. Reporting Requirements:
+   - Weekly pipeline report by sales rep
+   - Monthly win/loss analysis
+   - Lead source effectiveness
+   - Forecast accuracy tracking
+
+4. Integration Needs:
+   - Email integration with Gmail
+   - Calendar sync for meetings
+   - Quote generation (Phase 2)
+
+Action Items:
+- IT to setup sandbox by March 5
+- Sales team to provide sample data
+- Weekly standup every Monday
