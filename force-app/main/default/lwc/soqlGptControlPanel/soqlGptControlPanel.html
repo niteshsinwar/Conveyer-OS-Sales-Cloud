@@ -1,0 +1,506 @@
+<template>
+    <lightning-card>
+        <!-- Header -->
+        <div slot="title">
+            <div class="slds-media slds-media_center">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="utility:bot" size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h1 class="brand-title">SOQL-GPT</h1>
+                    <p class="slds-text-body_small slds-text-color_weak">AI-Powered SOQL Query Builder</p>
+                </div>
+            </div>
+        </div>
+
+        <div slot="actions">
+            <lightning-button-icon 
+                icon-name="utility:refresh"
+                alternative-text="Refresh Connection"
+                title="Refresh Connection"
+                onclick={testConnection}>
+            </lightning-button-icon>
+        </div>
+
+        <div class="slds-card__body slds-card__body_inner">
+            <!-- Connection Status -->
+            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <div class="slds-media slds-media_center">
+                    <div class="slds-media__figure">
+                        <span class={statusIconClass}>
+                            <lightning-icon 
+                                icon-name={statusIcon}
+                                size="x-small"
+                                variant={statusIconVariant}>
+                            </lightning-icon>
+                        </span>
+                    </div>
+                    <div class="slds-media__body">
+                        <p class="slds-text-body_small">
+                            <strong>Status:</strong> {connectionStatus}
+                        </p>
+                        <template if:true={sessionId}>
+                            <p class="slds-text-body_small slds-m-top_x-small">
+                                <strong>Session ID:</strong> 
+                                <lightning-formatted-text value={sessionId} class="slds-text-color_weak"></lightning-formatted-text>
+                            </p>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <template if:false={isScreen1}>
+                <lightning-progress-indicator 
+                    current-step={currentScreen} 
+                    type="base" 
+                    variant="base"
+                    class="slds-m-bottom_medium">
+                    <lightning-progress-step label="Query Input" value="1"></lightning-progress-step>
+                    <lightning-progress-step label="Intent" value="2" if:true={needsIntentAgent}></lightning-progress-step>
+                    <lightning-progress-step label="Objects" value="3"></lightning-progress-step>
+                    <lightning-progress-step label="Fields" value="4"></lightning-progress-step>
+                    <lightning-progress-step label="SOQL" value="5"></lightning-progress-step>
+                    <lightning-progress-step label="Results" value="6"></lightning-progress-step>
+                    <lightning-progress-step label="Complete" value="7"></lightning-progress-step>
+                </lightning-progress-indicator>
+            </template>
+
+            <!-- Error Message -->
+            <template if:true={errorMessage}>
+                <div class="slds-m-bottom_medium">
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">error</span>
+                        <h2>{errorMessage}</h2>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center slds-m-vertical_large">
+                    <div class="slds-text-align_center">
+                        <lightning-spinner 
+                            alternative-text={loadingMessage} 
+                            size="medium">
+                        </lightning-spinner>
+                        <p class="slds-text-align_center slds-m-top_medium">{loadingMessage}</p>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SCREEN 1: Query Input -->
+            <template if:true={isScreen1}>
+                <div class="wizard-screen">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_small">Enter Your Query</h2>
+                    
+                    <lightning-combobox
+                        name="workspace"
+                        label="Workspace (Optional)"
+                        value={selectedWorkspace}
+                        placeholder="Leave blank for auto-detection"
+                        options={workspaceOptions}
+                        onchange={handleWorkspaceChange}
+                        class="slds-m-bottom_small">
+                    </lightning-combobox>
+
+                    <template if:true={selectedWorkspaceDescription}>
+                        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small">
+                            <p class="slds-text-body_small">{selectedWorkspaceDescription}</p>
+                        </div>
+                    </template>
+
+                    <lightning-textarea
+                        name="query"
+                        label="Your Natural Language Query"
+                        value={userQuery}
+                        placeholder="e.g., Show me all open opportunities with amount greater than 10000"
+                        onchange={handleQueryChange}
+                        required
+                        class="slds-m-bottom_medium">
+                    </lightning-textarea>
+
+                    <div class="slds-text-align_center">
+                        <lightning-button
+                            variant="brand"
+                            label="Start Query Generation"
+                            icon-name="utility:forward"
+                            icon-position="right"
+                            onclick={handleNext}
+                            disabled={disableProceedScreen1}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SCREEN 2: Intent Agent Results -->
+            <template if:true={isScreen2}>
+                <div class="wizard-screen">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_small">Detected Workspace</h2>
+                    
+                    <div class="slds-box slds-theme_info slds-m-bottom_medium">
+                        <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+                            <lightning-icon icon-name="utility:database" size="x-small"></lightning-icon>
+                            Workspace: <strong>{intentWorkspace}</strong>
+                        </h3>
+                        <p class="slds-text-body_small"><strong>Confidence:</strong> {intentConfidence}%</p>
+                        <p class="slds-text-body_small slds-m-top_x-small">{intentRationale}</p>
+                    </div>
+
+                    <div class="slds-text-align_center">
+                        <lightning-button
+                            label="Back"
+                            onclick={handleBack}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label="Continue to Objects"
+                            icon-name="utility:forward"
+                            icon-position="right"
+                            onclick={handleNext}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SCREEN 3: Object Selection -->
+        <!-- Screen 3: Object Agent -->
+        <div if:true={isScreen3} class="wizard-screen">
+            <div class="slds-text-heading_medium slds-m-bottom_medium">
+                Select Salesforce Objects
+            </div>
+            
+            <div if:true={objectAgentRationale} class="slds-box slds-m-bottom_medium slds-theme_shade">
+                <p class="slds-text-body_small"><strong>Recommendation:</strong> {objectAgentRationale}</p>
+            </div>
+
+            <div if:true={suggestedObjects.length} class="field-list">
+                <template for:each={suggestedObjects} for:item="obj">
+                    <div key={obj} class="slds-form-element slds-m-bottom_x-small">
+                        <div class="slds-form-element__control">
+                            <div class="slds-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    id={obj} 
+                                    data-object={obj}
+                                    checked
+                                    onchange={handleObjectSelection} />
+                                <label class="slds-checkbox__label" for={obj}>
+                                    <span class="slds-checkbox_faux"></span>
+                                    <span class="slds-form-element__label">{obj}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Feedback Input -->
+            <div class="slds-m-top_medium">
+                <lightning-textarea
+                    label="Feedback (optional)"
+                    placeholder="Add feedback to refine the object selection..."
+                    value={objectFeedback}
+                    onchange={handleObjectFeedbackChange}>
+                </lightning-textarea>
+            </div>
+
+            <div class="slds-m-top_medium">
+                <lightning-button 
+                    label="Back" 
+                    onclick={handleBack}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Regenerate Objects" 
+                    icon-name="utility:refresh"
+                    onclick={handleRegenerateObjects}
+                    disabled={isLoading}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    variant="brand"
+                    label="Next" 
+                    onclick={handleNext}
+                    disabled={disableProceedScreen3}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Field Agent -->
+        <div if:true={isScreen4} class="wizard-screen">
+            <div class="slds-text-heading_medium slds-m-bottom_medium">
+                Select Fields
+            </div>
+            
+            <div if:true={fieldAgentRationale} class="slds-box slds-m-bottom_medium slds-theme_shade">
+                <p class="slds-text-body_small"><strong>Recommendation:</strong> {fieldAgentRationale}</p>
+            </div>
+
+            <div if:true={suggestedFields.length} class="field-list">
+                <template for:each={suggestedFields} for:item="field">
+                    <div key={field} class="slds-form-element slds-m-bottom_x-small">
+                        <div class="slds-form-element__control">
+                            <div class="slds-checkbox">
+                                <input 
+                                    type="checkbox" 
+                                    id={field} 
+                                    data-field={field}
+                                    checked
+                                    onchange={handleFieldSelection} />
+                                <label class="slds-checkbox__label" for={field}>
+                                    <span class="slds-checkbox_faux"></span>
+                                    <span class="slds-form-element__label">{field}</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Feedback Input -->
+            <div class="slds-m-top_medium">
+                <lightning-textarea
+                    label="Feedback (optional)"
+                    placeholder="Add feedback to refine the field selection..."
+                    value={fieldFeedback}
+                    onchange={handleFieldFeedbackChange}>
+                </lightning-textarea>
+            </div>
+
+            <div class="slds-m-top_medium">
+                <lightning-button 
+                    label="Back" 
+                    onclick={handleBack}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Regenerate Fields" 
+                    icon-name="utility:refresh"
+                    onclick={handleRegenerateFields}
+                    disabled={isLoading}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    variant="brand"
+                    label="Next" 
+                    onclick={handleNext}
+                    disabled={disableProceedScreen4}>
+                </lightning-button>
+            </div>
+        </div>
+
+            <!-- SCREEN 5: SOQL Query -->
+            <template if:true={isScreen5}>
+                <div class="wizard-screen">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_small">Generated SOQL Query</h2>
+                    
+                    <div class="slds-box slds-theme_shade slds-m-bottom_small">
+                        <p class="slds-text-body_small">{soqlRationale}</p>
+                    </div>
+
+                    <!-- Editable SOQL Query -->
+                    <lightning-textarea
+                        name="soqlQuery"
+                        label="SOQL Query (Editable)"
+                        value={soqlQuery}
+                        onchange={handleSoqlChange}
+                        class="slds-m-bottom_small">
+                    </lightning-textarea>
+
+                    <!-- Feedback Input -->
+                    <div class="slds-m-bottom_small">
+                        <lightning-textarea
+                            label="Feedback (optional)"
+                            placeholder="Add feedback to refine the SOQL query..."
+                            value={soqlFeedback}
+                            onchange={handleSoqlFeedbackChange}>
+                        </lightning-textarea>
+                    </div>
+
+                    <div class="slds-m-bottom_small">
+                        <lightning-button
+                            label="Copy Query"
+                            icon-name="utility:copy"
+                            onclick={handleCopyQuery}
+                            class="slds-m-right_x-small">
+                        </lightning-button>
+                        <lightning-button
+                            label="Regenerate SOQL"
+                            icon-name="utility:refresh"
+                            onclick={handleRegenerateSoql}
+                            disabled={isLoading}>
+                        </lightning-button>
+                    </div>
+
+                    <!-- Chart Recommendation Section -->
+                    <template if:true={chartRecommendation}>
+                        <div class="slds-box slds-theme_default slds-m-bottom_medium">
+                            <div class="slds-media slds-media_center slds-m-bottom_small">
+                                <div class="slds-media__figure">
+                                    <lightning-icon 
+                                        icon-name="utility:chart" 
+                                        size="small"
+                                        variant="brand">
+                                    </lightning-icon>
+                                </div>
+                                <div class="slds-media__body">
+                                    <h3 class="slds-text-heading_small">Chart Visualization Preview</h3>
+                                </div>
+                            </div>
+
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <!-- Chart Type -->
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                                        <p class="slds-text-body_small slds-text-color_weak">Chart Type</p>
+                                        <p class="slds-text-heading_small slds-m-top_xx-small">
+                                            <lightning-badge label={chartType}></lightning-badge>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- X-Axis Field -->
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                                        <p class="slds-text-body_small slds-text-color_weak">X-Axis Field</p>
+                                        <p class="slds-text-heading_small slds-m-top_xx-small">
+                                            <lightning-icon icon-name="utility:forward" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            {xField}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Y-Axis Field -->
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                    <div class="slds-box slds-box_x-small slds-theme_shade">
+                                        <p class="slds-text-body_small slds-text-color_weak">Y-Axis Field</p>
+                                        <p class="slds-text-heading_small slds-m-top_xx-small">
+                                            <lightning-icon icon-name="utility:arrowup" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            {yField}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rationale -->
+                            <template if:true={chartRationale}>
+                                <div class="slds-m-top_small">
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        <lightning-icon icon-name="utility:info" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        {chartRationale}
+                                    </p>
+                                </div>
+                            </template>
+
+                            <!-- Supported Chart Types -->
+                            <template if:true={supportedChartTypes.length}>
+                                <div class="slds-m-top_small">
+                                    <p class="slds-text-body_small slds-text-color_weak slds-m-bottom_xx-small">
+                                        Alternative chart types available:
+                                    </p>
+                                    <template for:each={supportedChartTypes} for:item="type">
+                                        <lightning-badge 
+                                            key={type}
+                                            label={type}
+                                            class="slds-m-right_xx-small">
+                                        </lightning-badge>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="slds-text-align_center">
+                        <lightning-button
+                            label="Back"
+                            onclick={handleBack}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label="Execute Query"
+                            icon-name="utility:database"
+                            icon-position="right"
+                            onclick={handleNext}
+                            disabled={isLoading}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SCREEN 6: Results -->
+            <template if:true={isScreen6}>
+                <div class="wizard-screen">
+                    <h2 class="slds-text-heading_medium slds-m-bottom_small">
+                        Query Results ({recordCount} records)
+                    </h2>
+
+                    <!-- Chart -->
+                    <template if:true={hasChartRecommendation}>
+                        <div class="chart-container slds-m-bottom_medium" style="height: 400px; position: relative;">
+                            <canvas lwc:dom="manual" class="chart"></canvas>
+                        </div>
+                    </template>
+
+                    <!-- Data Table -->
+                    <div class="table-container slds-m-bottom_medium">
+                        <lightning-datatable
+                            key-field="Id"
+                            data={tableData}
+                            columns={tableColumns}
+                            hide-checkbox-column
+                            show-row-number-column>
+                        </lightning-datatable>
+                    </div>
+
+                    <div class="slds-text-align_center">
+                        <lightning-button
+                            label="Download CSV"
+                            icon-name="utility:download"
+                            onclick={handleDownloadCSV}
+                            class="slds-m-right_small">
+                        </lightning-button>
+                        <lightning-button
+                            variant="brand"
+                            label="Complete Session"
+                            icon-name="utility:success"
+                            icon-position="right"
+                            onclick={handleNext}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            <!-- SCREEN 7: Completion -->
+            <template if:true={isScreen7}>
+                <div class="wizard-screen slds-text-align_center">
+                    <div class="slds-m-bottom_large">
+                        <lightning-icon 
+                            icon-name="utility:success" 
+                            size="large"
+                            variant="success">
+                        </lightning-icon>
+                    </div>
+                    
+                    <h2 class="slds-text-heading_large slds-m-bottom_small">
+                        Session Complete!
+                    </h2>
+                    
+                    <p class="slds-text-body_regular slds-m-bottom_large">
+                        Your SOQL query has been generated and executed successfully.<br/>
+                        {recordCount} records were retrieved from {selectedObjects.length} object(s).
+                    </p>
+
+                    <lightning-button
+                        variant="brand"
+                        label="Start New Query"
+                        icon-name="utility:refresh"
+                        onclick={handleStartOver}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

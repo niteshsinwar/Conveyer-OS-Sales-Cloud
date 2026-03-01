@@ -1,0 +1,270 @@
+<template>
+    <div class="aifdl-container">
+        <div class="aifdl-blur-background"></div>
+        <div class="aifdl-header">
+            <div class="aifdl-header-content">
+                <div class="aifdl-logo">
+                    <lightning-icon icon-name="utility:einstein" size="small" alternative-text="AIForce Icon" class="aifdl-logo-icon"></lightning-icon>
+                    <h1>AIForce Data Lense</h1>
+                </div>
+                <template if:true={chatDisabled}>
+                    <div class="aifdl-badge aifdl-badge-success">
+                        <lightning-icon icon-name="utility:success" size="xx-small" class="aifdl-badge-icon"></lightning-icon>
+                        Session Completed
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div class="aifdl-content">
+            <div class="aifdl-chat-area" aria-live="polite">
+                <template if:true={showEmptyState}>
+                    <div class="aifdl-empty-state">
+                        <div class="aifdl-empty-graphic">
+                            <svg width="140" height="140" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="120" cy="120" r="120" fill="url(#paint0_linear)" fill-opacity="0.1"/><circle cx="120" cy="120" r="90" fill="url(#paint1_linear)" fill-opacity="0.15"/><circle cx="120" cy="120" r="60" fill="url(#paint2_linear)" fill-opacity="0.2"/><path d="M155 95C155 114.33 139.33 130 120 130C100.67 130 85 114.33 85 95C85 75.67 100.67 60 120 60C139.33 60 155 75.67 155 95Z" fill="url(#paint3_linear)" fill-opacity="0.3"/><path d="M140 170C140 181.046 131.046 190 120 190C108.954 190 100 181.046 100 170C100 158.954 108.954 150 120 150C131.046 150 140 158.954 140 170Z" fill="url(#paint4_linear)" fill-opacity="0.3"/><path d="M170 120C170 126.627 164.627 132 158 132C151.373 132 146 126.627 146 120C146 113.373 151.373 108 158 108C164.627 108 170 113.373 170 120Z" fill="url(#paint5_linear)" fill-opacity="0.3"/><path d="M94 120C94 126.627 88.6274 132 82 132C75.3726 132 70 126.627 70 120C70 113.373 75.3726 108 82 108C88.6274 108 94 113.373 94 120Z" fill="url(#paint6_linear)" fill-opacity="0.3"/><defs><linearGradient id="paint0_linear" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint1_linear" x1="30" y1="30" x2="210" y2="210" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint2_linear" x1="60" y1="60" x2="180" y2="180" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint3_linear" x1="85" y1="60" x2="155" y2="130" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint4_linear" x1="100" y1="150" x2="140" y2="190" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint5_linear" x1="146" y1="108" x2="170" y2="132" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient><linearGradient id="paint6_linear" x1="70" y1="108" x2="94" y2="132" gradientUnits="userSpaceOnUse"><stop stop-color="#3182CE"/><stop offset="1" stop-color="#805AD5"/></linearGradient></defs></svg>
+                        </div>
+                        <h2>Welcome to AIForce Data Lense</h2>
+                        <p class="aifdl-empty-primary">Ask a question about your data to generate insights</p>
+                        <div class="aifdl-example-queries">
+                            <div class="aifdl-example-query" onclick={handleExampleClick} data-query="Show sales by region as a bar chart" role="button" tabindex="0">
+                                <lightning-icon icon-name="utility:chart" size="x-small" class="aifdl-example-query-icon"></lightning-icon>
+                                Show sales by region as a bar chart
+                            </div>
+                            <div class="aifdl-example-query" onclick={handleExampleClick} data-query="What were our top 5 products last quarter?" role="button" tabindex="0">
+                                <lightning-icon icon-name="utility:product" size="x-small" class="aifdl-example-query-icon"></lightning-icon>
+                                What were our top 5 products last quarter?
+                            </div>
+                            <div class="aifdl-example-query" onclick={handleExampleClick} data-query="Summarize current revenue trends in a PDF report" role="button" tabindex="0">
+                                <lightning-icon icon-name="utility:file" size="x-small" class="aifdl-example-query-icon"></lightning-icon>
+                                Summarize current revenue trends in a PDF report
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template for:each={messages} for:item="message">
+                    <div key={message.id} class={message.computedSenderStyle}>
+                        <div class="aifdl-message-header">
+                            <div class={message.avatarClass}>
+                                <template if:true={message.isUser}>
+                                    {message.avatarInitial}
+                                </template>
+                                <template if:false={message.isUser}>
+                                    <lightning-icon icon-name="utility:einstein" size="x-small" class="aifdl-ai-avatar-icon" alternative-text="AI Avatar"></lightning-icon>
+                                </template>
+                            </div>
+                            <div class="aifdl-message-meta">
+                                <span class="aifdl-message-sender">{message.sender}</span>
+                                <span class="aifdl-message-timestamp">{message.timestamp}</span>
+                            </div>
+                        </div>
+                        <div class={message.messageContentStyle}>
+                             <template if:true={message.text}>
+                                <p class={message.computedTextStyle}>{message.text}</p>
+                            </template>
+
+                            <template if:true={message.isImageMessage}>
+                                <div class="aifdl-image-summary-wrapper"> 
+                                    <div class="aifdl-chart-summary-container">
+                                        <div class="aifdl-chart-image-wrapper">
+                                            <img src={message.imageUrl} alt="Generated Chart" class="aifdl-generated-image"
+                                                 data-message-id={message.id} onclick={handleChartImageClick} />
+                                        </div>
+                                        <template if:true={message.summaryDetails}>
+                                            <div class="aifdl-chart-summary-details">
+                                                <template if:true={message.summaryDetails.summary_bullet_points}>
+                                                    <div class="aifdl-summary-section">
+                                                        <strong>Summary:</strong>
+                                                        <ul class="slds-list_dotted">
+                                                            <template for:each={message.summaryDetails.summary_bullet_points} for:item="point">
+                                                                <li key={point}>{point}</li>
+                                                            </template>
+                                                        </ul>
+                                                    </div>
+                                                </template>
+                                                </div>
+                                        </template>
+                                        </div>
+                                    <div class="aifdl-image-message-actions">
+                                        <template if:true={message.requiresApproval}>
+                                            <div class="aifdl-approval-actions">
+                                                <p>Do you want to generate a PDF report for this visualization?</p>
+                                                <lightning-button label="Yes, Generate PDF" variant="brand" data-message-id={message.id} onclick={handleImageApproval} class="slds-m-right_xsmall"></lightning-button>
+                                                <lightning-button label="Show Other Chart Types" data-message-id={message.id} onclick={handleShowChartOptionsForMessage}></lightning-button>
+                                            </div>
+                                        </template>
+                                        <template if:true={message.isApprovedForPdf}>
+                                            <p class="aifdl-text-color-success slds-m-top_small">PDF generation initiated. Check for preview below or in generated files.</p>
+                                        </template>
+                                        <template if:true={message.pdfGenerationError}>
+                                            <p class="aifdl-text-color-error slds-m-top_small">Could not generate PDF for this chart.</p>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:true={message.isThinking}>
+                                <div class="aifdl-thinking-indicator">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </template>
+                             <template if:false={message.isThinking}>
+                                <template if:false={message.isImageMessage}>
+                                    <template if:true={message.text}> <lightning-button-icon
+                                            icon-name="utility:copy"
+                                            variant="bare"
+                                            onclick={handleCopyMessage}
+                                            data-id={message.id}
+                                            alternative-text="Copy message"
+                                            title="Copy message"
+                                            class="aifdl-copy-button"
+                                        ></lightning-button-icon>
+                                    </template>
+                                </template>
+                            </template>
+                        </div>
+
+                        <template if:true={message.isFileCardMessage}>
+                             <div class="aifdl-file-card">
+                                <div class="aifdl-file-card-header">
+                                    <lightning-icon icon-name="utility:file" size="small" class="aifdl-file-icon" alternative-text="File Icon"></lightning-icon>
+                                    <span>{message.fileCardTitle}</span>
+                                </div>
+                                <div class="aifdl-file-preview-wrapper">
+                                    <iframe src={message.fileDownloadUrl} title="Document Preview" class="aifdl-file-iframe" ></iframe>
+                                    <div class="aifdl-file-overlay">
+                                        <div class="aifdl-file-controls">
+                                            <lightning-button-icon icon-name="utility:expand_alt" variant="border-filled" size="large"
+                                                alternative-text="Full Preview" data-url={message.fileDownloadUrl} onclick={handleExpandPreview} class="aifdl-file-control-button"></lightning-button-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <template if:true={showChartOptions}>
+                <div class="aifdl-chart-options">
+                    <div class="aifdl-chart-options-header">
+                        <lightning-icon icon-name="utility:chart" size="small" alternative-text="Chart Icon"></lightning-icon>
+                        <h3>Try another visualization</h3>
+                    </div>
+                    <div class="aifdl-chart-options-grid">
+                        <template for:each={availableChartTypes} for:item="chartType">
+                            <div key={chartType.value} class="aifdl-chart-option" data-type={chartType.value} onclick={handleChartTypeSelection} title={chartType.description} role="button" tabindex="0">
+                                <div class="aifdl-chart-option-icon">
+                                     <template if:true={chartType.isBar}><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="12" width="3" height="8" rx="1" fill="currentColor"></rect><rect x="8" y="8" width="3" height="12" rx="1" fill="currentColor"></rect><rect x="13" y="5" width="3" height="15" rx="1" fill="currentColor"></rect><rect x="18" y="3" width="3" height="17" rx="1" fill="currentColor"></rect></svg></template>
+                                    <template if:true={chartType.isLine}><svg viewBox="0 0 24 24" width="24" height="24"><path d="M3 16L8 11L13 16L21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"></path><circle cx="3" cy="16" r="2" fill="currentColor"></circle><circle cx="8" cy="11" r="2" fill="currentColor"></circle><circle cx="13" cy="16" r="2" fill="currentColor"></circle><circle cx="21" cy="8" r="2" fill="currentColor"></circle></svg></template>
+                                    <template if:true={chartType.isPie}><svg viewBox="0 0 24 24" width="24" height="24"><path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" fill="none" stroke="currentColor" stroke-width="2"></path><path d="M12 3V12L18 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></template>
+                                    <template if:true={chartType.isScatter}><svg viewBox="0 0 24 24" width="24" height="24"><circle cx="5" cy="7" r="2" fill="currentColor"></circle><circle cx="12" cy="17" r="2" fill="currentColor"></circle><circle cx="18" cy="6" r="2" fill="currentColor"></circle><circle cx="8" cy="13" r="2" fill="currentColor"></circle><circle cx="15" cy="11" r="2" fill="currentColor"></circle></svg></template>
+                                    <template if:true={chartType.isHist}><svg viewBox="0 0 24 24" width="24" height="24"><rect x="3" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="9" y="9" width="4" height="10" rx="1" fill="currentColor"></rect><rect x="15" y="7" width="4" height="12" rx="1" fill="currentColor"></rect><rect x="21" y="12" width="0" height="7" rx="0" fill="currentColor"></rect></svg></template>
+                                    <template if:true={chartType.isBox}><svg viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="7" width="4" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="6" y1="4" x2="6" y2="7" stroke="currentColor" stroke-width="2"></line><line x1="6" y1="17" x2="6" y2="20" stroke="currentColor" stroke-width="2"></line><line x1="4" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="2"></line><rect x="14" y="7" width="4" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="16" y1="4" x2="16" y2="7" stroke="currentColor" stroke-width="2"></line><line x1="16" y1="17" x2="16" y2="20" stroke="currentColor" stroke-width="2"></line><line x1="14" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2"></line></svg></template>
+                                </div>
+                                <span>{chartType.label}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={showPdfPreview}>
+                <div class="aifdl-pdf-preview-container">
+                    <div class="aifdl-pdf-preview-header">
+                        <div class="aifdl-pdf-preview-title">
+                            <lightning-icon icon-name="utility:file" size="small" alternative-text="File Icon"></lightning-icon>
+                            <h3>Data Report Preview</h3>
+                        </div>
+                        <div class="aifdl-pdf-preview-controls">
+                            <template if:true={showApproveAndCompleteButton}>
+                                <lightning-button
+                                    label="Approve & Complete"
+                                    variant="brand"
+                                    icon-name="utility:check"
+                                    onclick={handleApprovePdfAndComplete}
+                                    class="aifdl-approve-button">
+                                </lightning-button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="aifdl-pdf-preview-content">
+                        <template if:true={pdfFileUrlForPreview}>
+                            <iframe src={pdfFileUrlForPreview} title="PDF Preview" class="aifdl-pdf-iframe" ></iframe>
+                        </template>
+                         <template if:false={pdfFileUrlForPreview}>
+                            <p class="slds-align_absolute-center slds-p-around_medium">Generating PDF preview...</p>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isFullscreenPreview}>
+                <div class="aifdl-fullscreen-preview" onclick={handleCloseFullscreen} role="dialog" aria-modal="true" aria-labelledby="file-preview-heading">
+                    <div class="aifdl-fullscreen-header">
+                        <h3 id="file-preview-heading">Full Preview</h3>
+                        <lightning-button-icon icon-name="utility:close" variant="border-filled"
+                            alternative-text="Close Preview" onclick={handleCloseFullscreen} class="aifdl-close-button"></lightning-button-icon>
+                    </div>
+                    <div class="aifdl-fullscreen-content" onclick={stopPropagation}>
+                        <iframe src={activeFullscreenUrl} title="Fullscreen Preview" class="aifdl-fullscreen-iframe" ></iframe>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isFullscreenChartPreview}>
+                <div class="aifdl-fullscreen-chart-preview" onclick={handleCloseFullscreenChart} role="dialog" aria-modal="true" aria-labelledby="chart-preview-heading">
+                    <div class="aifdl-fullscreen-chart-header">
+                        <h3 id="chart-preview-heading">Chart Preview</h3>
+                        <lightning-button-icon icon-name="utility:close" variant="border-filled"
+                            alternative-text="Close Chart Preview" onclick={handleCloseFullscreenChart}
+                            class="aifdl-close-button"></lightning-button-icon>
+                    </div>
+                    <div class="aifdl-fullscreen-chart-content" onclick={stopPropagation}>
+                        <img src={activeFullscreenChartUrl} alt="Enlarged Chart" />
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="aifdl-input-area">
+            <div class="aifdl-input-wrapper">
+                <lightning-textarea
+                    label="Enter your query"
+                    value={userQuery}
+                    onchange={handleInputChange}
+                    onkeypress={handleKeyPress}
+                    class="aifdl-query-input"
+                    variant="label-hidden"
+                    placeholder={inputPlaceholder}
+                    disabled={chatDisabled}
+                    rows="1"
+                    max-rows="4">
+                </lightning-textarea>
+                <div class="aifdl-input-buttons">
+                    <lightning-button-icon
+                        icon-name="utility:send"
+                        variant="brand"
+                        onclick={handleSend}
+                        class="aifdl-send-button"
+                        disabled={isSendButtonDisabled}
+                        alternative-text="Send Query"
+                        title="Send Query">
+                    </lightning-button-icon>
+                </div>
+            </div>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="aifdl-loading-overlay">
+                <div class="aifdl-loader">
+                    <div class="aifdl-loader-visual">
+                        <div class="aifdl-loader-orb"></div>
+                        <div class="aifdl-loader-orb"></div>
+                        <div class="aifdl-loader-orb"></div>
+                    </div>
+                    <p>{loadingMessage}</p>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

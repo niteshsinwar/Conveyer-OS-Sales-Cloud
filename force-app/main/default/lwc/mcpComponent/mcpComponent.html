@@ -1,0 +1,43 @@
+<template>
+    <lightning-card title="Enhanced MCP Object Manager">
+        <div class="slds-p-around_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+            
+            <div class="slds-box slds-m-bottom_medium">
+                <h3>Create New MCP Record</h3>
+                <lightning-input label="Field Value" value={fieldValue} onchange={handleChange} disabled={isLoading}></lightning-input>
+                <lightning-button label="Create MCP Record" onclick={handleCreate} variant="brand" class="slds-m-top_small" disabled={isLoading}></lightning-button>
+            </div>
+            
+            <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                <p><strong>Total MCP Records: {recordCount}</strong></p>
+            </div>
+            
+            <div class="slds-m-top_medium">
+                <h3>MCP Records</h3>
+                <template if:true={records}>
+                    <template if:true={records.length}>
+                        <template for:each={records} for:item="record">
+                            <div key={record.Id} class="slds-box slds-m-bottom_small">
+                                <div class="slds-grid slds-grid_align-spread">
+                                    <div class="slds-col">
+                                        <p><strong>{record.Name}</strong></p>
+                                        <p><lightning-formatted-date-time value={record.CreatedDate}></lightning-formatted-date-time></p>
+                                    </div>
+                                    <div class="slds-col slds-no-flex">
+                                        <lightning-button label="Delete" onclick={handleDelete} data-id={record.Id} variant="destructive" size="small" disabled={isLoading}></lightning-button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={records.length}>
+                        <p class="slds-text-align_center">No MCP records found.</p>
+                    </template>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

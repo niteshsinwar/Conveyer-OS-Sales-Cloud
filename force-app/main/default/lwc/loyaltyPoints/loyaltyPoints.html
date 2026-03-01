@@ -1,0 +1,9 @@
+<template>
+    <lightning-card title="Loyalty Points">
+        <div class="slds-p-around_medium">
+            <p>Current Points: {loyaltyPoints}</p>
+            <lightning-button label="Add 10 Points" onclick={handleAdd}></lightning-button>
+            <lightning-button label="Reset Points" onclick={handleReset} class="slds-m-left_small"></lightning-button>
+        </div>
+    </lightning-card>
+</template>

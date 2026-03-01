@@ -1,0 +1,101 @@
+<template>
+    <div class={fabContainerClass}>
+        <lightning-button-icon
+            icon-name="utility:chat"
+            variant="brand"
+            alternative-text="Open Endgame AI Chat"
+            title="Open Endgame AI Chat"
+            class="slds-button_icon-large fab-button"
+            onclick={handleFabClick}>
+        </lightning-button-icon>
+    </div>
+
+    <template if:true={isModalOpen}>
+        <div> <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_large">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon class="slds-modal__close"
+                            title="Close"
+                            icon-name="utility:close"
+                            icon-class="slds-button_icon-inverse"
+                            alternative-text="Close"
+                            onclick={handleCloseModal}>
+                        </lightning-button-icon>
+                        <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate slds-text-heading_medium">Endgame AI</h2>
+                        <p class="slds-modal__tagline slds-text-body_small slds-m-top_xx-small">Your Command is My Reality</p>
+                    </header>
+
+                    <div class="slds-modal__content" id="modal-content-id-1">
+                        <div class="chat-history-container">
+                             <ul class="slds-chat-list">
+                                <template for:each={chatHistory} for:item="message">
+                                    <li key={message.id} class={message.listItemClass}>
+                                        <div class="slds-chat-message">
+                                            <div class={message.messageBodyClass}>
+                                                <lightning-formatted-rich-text
+                                                    class="chat-message-text"
+                                                    value={message.formattedText}
+                                                ></lightning-formatted-rich-text>
+                                                <template if:true={message.isError}>
+                                                    <p class="slds-text-body_small slds-text-color_error slds-m-top_x-small">Please check the error details above.</p>
+                                                </template>
+                                            </div>
+                                            <div class="slds-chat-message__meta">
+                                                <span class={message.metaTextColorClass} aria-label={message.ariaLabel}>
+                                                    {message.senderLabel} &bull; {message.timestamp}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </template>
+                                <template if:true={isLoading}>
+                                    <li class="slds-chat-listitem slds-chat-listitem_inbound">
+                                         <div class="slds-chat-message">
+                                            <div class="slds-chat-message__body slds-theme_default slds-p-around_small">
+                                                <div class="slds-is-relative slds-p-left_medium" style="min-height: 2rem;">
+                                                    <lightning-spinner variant="brand" size="small" alternative-text="Thinking..."></lightning-spinner>
+                                                    <span class="slds-text-body_small slds-text-color_weak slds-m-left_small" style="position: relative; top: -3px;">Thinking...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <div class="slds-grid slds-gutters slds-cross-axis-center">
+                            <div class="slds-col slds-grow">
+                                <lightning-textarea
+                                    label="Command Input"
+                                    variant="label-hidden"
+                                    placeholder="Instruct Endgame..."
+                                    value={userInput}
+                                    onchange={handleInputChange}
+                                    onkeydown={handleKeyDown}
+                                    disabled={isLoading}
+                                    class="chat-input"
+                                    message-when-value-missing="Please enter a command."
+                                ></lightning-textarea>
+                            </div>
+                            <div class="slds-col slds-shrink-none">
+                                <lightning-button
+                                    label="Execute"
+                                    title="Execute Command (Enter)"
+                                    icon-name="utility:send"
+                                    icon-position="left"
+                                    variant="brand"
+                                    onclick={handleSend}
+                                    disabled={isSendDisabled}
+                                    class="execute-button">
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </template>
+</template>

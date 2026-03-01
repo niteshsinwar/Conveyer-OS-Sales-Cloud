@@ -1,0 +1,54 @@
+<template>
+    <div class="slds-is-relative">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Saving..." size="small"></lightning-spinner>
+        </template>
+        
+        <lightning-record-edit-form
+            object-api-name="Task__c"
+            record-id={taskId}
+            onsubmit={handleSubmit}
+            onsuccess={handleSuccess}
+            onerror={handleError}>
+            
+            <lightning-messages></lightning-messages>
+            
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input-field field-name="TaskName__c" required></lightning-input-field>
+                </div>
+                
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input-field field-name="AssignedTo__c"></lightning-input-field>
+                </div>
+                
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input-field field-name="DueDate__c"></lightning-input-field>
+                </div>
+                
+                <div class="slds-col slds-size_1-of-2">
+                    <lightning-input-field field-name="Status__c"></lightning-input-field>
+                </div>
+                
+                <div class="slds-hide">
+                    <lightning-input-field field-name="Project__c" value={projectId}></lightning-input-field>
+                </div>
+                
+                <div class="slds-col slds-size_1-of-1 slds-m-top_medium slds-text-align_right">
+                    <lightning-button 
+                        variant="neutral" 
+                        label="Cancel" 
+                        onclick={handleCancel} 
+                        class="slds-m-right_x-small">
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        type="submit" 
+                        label="Save" 
+                        disabled={isLoading}>
+                    </lightning-button>
+                </div>
+            </div>
+        </lightning-record-edit-form>
+    </div>
+</template>

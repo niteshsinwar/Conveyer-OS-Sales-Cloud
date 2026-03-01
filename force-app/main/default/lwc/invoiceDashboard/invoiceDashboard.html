@@ -1,0 +1,87 @@
+<template>
+    <div class="slds-grid slds-wrap slds-gutters">
+        <!-- Dashboard Header -->
+        <div class="slds-col slds-size_1-of-1">
+            <div class="dashboard-card">
+                <h1 class="slds-text-heading_large slds-m-bottom_small">
+                    Invoice Management Dashboard
+                </h1>
+                <p class="slds-text-body_regular">
+                    Welcome back! Here's your invoice summary.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <template if:true={statsCards}>
+            <template for:each={statsCards} for:item="card">
+                <div key={card.label} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="stat-card">
+                        <div class={card.numberClass}>
+                            {card.count}
+                        </div>
+                        <div class="stat-label">
+                            {card.label}
+                        </div>
+                        <template if:true={card.amount}>
+                            <div class="stat-amount">
+                                {card.amount}
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </template>
+        
+        <!-- Recent Activity -->
+        <div class="slds-col slds-size_1-of-1">
+            <div class="recent-activity">
+                <h3 class="slds-text-heading_small slds-m-bottom_medium">
+                    Recent Invoices
+                </h3>
+                <template if:true={hasRecentInvoices}>
+                    <template for:each={recentInvoices} for:item="invoice">
+                        <div key={invoice.Id} class="activity-item">
+                            <div class="slds-grid">
+                                <div class="slds-col slds-grow">
+                                    <div class="slds-text-body_regular">
+                                        <strong>{invoice.Invoice_Number__c}</strong>
+                                    </div>
+                                    <div class="slds-text-body_small slds-text-color_weak">
+                                        {invoice.customerName}
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-no-flex">
+                                    <div class="slds-text-align_right">
+                                        <div class="slds-text-body_regular slds-text-color_success">
+                                            {invoice.formattedAmount}
+                                        </div>
+                                        <div class="slds-text-body_small">
+                                            <span class={invoice.statusClass}>
+                                                {invoice.Status__c}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+                
+                <div class="slds-text-align_center slds-m-top_medium">
+                    <lightning-button 
+                        variant="brand" 
+                        label="View All Invoices" 
+                        onclick={navigateToInvoiceList}>
+                    </lightning-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <template if:true={error}>
+        <div class="slds-notify slds-notify_alert slds-theme_error slds-m-around_small">
+            Error: {error}
+        </div>
+    </template>
+</template>

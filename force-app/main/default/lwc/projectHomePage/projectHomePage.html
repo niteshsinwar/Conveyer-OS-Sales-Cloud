@@ -1,0 +1,101 @@
+<template>
+    <lightning-card title="Project Management Dashboard" icon-name="custom:custom63">
+        <!-- Header Section with Actions -->
+        <div slot="actions">
+            <lightning-button-group>
+                <lightning-button
+                    label="Refresh"
+                    icon-name="utility:refresh"
+                    onclick={handleRefresh}>
+                </lightning-button>
+                <lightning-button
+                    label="Add Project"
+                    icon-name="utility:add"
+                    variant="brand"
+                    onclick={handleAddProject}>
+                </lightning-button>
+            </lightning-button-group>
+        </div>
+        
+        <!-- Error Message -->
+        <template if:true={error}>
+            <div class="slds-m-around_medium">
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <span class="slds-icon_container slds-icon-utility-error slds-m-right_small">
+                        <lightning-icon icon-name="utility:error" size="small" variant="inverse"></lightning-icon>
+                    </span>
+                    <h2>An error occurred while loading projects. Please try refreshing the page.</h2>
+                </div>
+            </div>
+        </template>
+        
+        <!-- Search and Filter Bar -->
+        <div class="slds-m-around_medium slds-grid slds-wrap slds-grid_align-spread">
+            <div class="slds-col slds-size_1-of-1 slds-large-size_3-of-4">
+                <lightning-input
+                    type="search"
+                    label="Search Projects"
+                    placeholder="Search by name, status, or priority..."
+                    variant="label-hidden"
+                    class="slds-m-bottom_small"
+                    onchange={handleSearchChange}>
+                </lightning-input>
+            </div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-is-relative slds-m-around_large">
+                <lightning-spinner alternative-text="Loading projects" size="medium"></lightning-spinner>
+            </div>
+        </template>
+        
+        <!-- Data Table -->
+        <template if:false={isLoading}>
+            <template if:true={hasProjects}>
+                <div class="slds-m-around_small">
+                    <lightning-datatable
+                        key-field="Id"
+                        data={projects}
+                        columns={columns}
+                        hide-checkbox-column
+                        sorted-by={sortedBy}
+                        sorted-direction={sortedDirection}
+                        onsort={handleSort}
+                        onrowaction={handleRowAction}
+                        enable-infinite-loading>
+                    </lightning-datatable>
+                </div>
+            </template>
+            
+            <!-- Empty State -->
+            <template if:false={hasProjects}>
+                <div class="slds-illustration slds-illustration_small slds-m-around_large">
+                    <div class="slds-text-longform">
+                        <h3 class="slds-text-heading_medium slds-m-vertical_medium">
+                            {noProjectsMessage}
+                        </h3>
+                        <p class="slds-text-body_regular">
+                            <lightning-button 
+                                label="Add Your First Project" 
+                                icon-name="utility:add"
+                                variant="brand" 
+                                onclick={handleAddProject}>
+                            </lightning-button>
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </template>
+        
+        <!-- Footer with Record Count -->
+        <div slot="footer">
+            <template if:true={hasProjects}>
+                <div class="slds-text-body_small slds-text-color_weak">
+                    Showing {projects.length} projects
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

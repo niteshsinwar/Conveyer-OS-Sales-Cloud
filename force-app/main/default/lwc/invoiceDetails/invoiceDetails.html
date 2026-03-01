@@ -1,0 +1,270 @@
+<template>
+    <div class="slds-card">
+        <!-- Invoice Header -->
+        <template if:true={invoice}>
+            <div class="invoice-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-2">
+                        <h1 class="slds-text-heading_large slds-m-bottom_small">
+                            Invoice {invoice.Invoice_Number__c}
+                        </h1>
+                        <p class="slds-text-body_regular">
+                            Customer: {customerName}
+                        </p>
+                        <p class="slds-text-body_small">
+                            Created: {formattedCreatedDate}
+                        </p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                        <div class="slds-m-bottom_small">
+                            <span class={statusBadgeClass}>{invoice.Status__c}</span>
+                        </div>
+                        <div class="slds-text-heading_medium">
+                            Total: {formattedTotal}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div class="slds-card__body slds-card__body_inner">
+            <!-- Actions -->
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col">
+                    <lightning-button-group>
+                        <lightning-button 
+                            variant="brand" 
+                            label="Add Line Item" 
+                            onclick={openAddLineItemModal}
+                            icon-name="utility:add">
+                        </lightning-button>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Change Status" 
+                            onclick={openStatusModal}
+                            icon-name="utility:edit">
+                        </lightning-button>
+                        <lightning-button 
+                            variant="neutral" 
+                            label="Refresh" 
+                            onclick={refreshData}
+                            icon-name="utility:refresh">
+                        </lightning-button>
+                    </lightning-button-group>
+                </div>
+            </div>
+
+            <!-- Line Items Section -->
+            <div class="slds-section slds-is-open">
+                <h3 class="slds-section__title slds-theme_shade">
+                    <span class="slds-truncate slds-p-horizontal_small">
+                        Line Items ({lineItemCount})
+                    </span>
+                </h3>
+                
+                <template if:true={hasLineItems}>
+                    <div class="slds-section__content">
+                        <!-- Line Items Table -->
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">
+                                        <div class="slds-truncate">Product</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate">Quantity</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate">Unit Price</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate">Line Total</div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate">Actions</div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={lineItems} for:item="item">
+                                    <tr key={item.Id} class="line-item-row">
+                                        <td>
+                                            <div class="slds-truncate">{item.Product_Name__c}</div>
+                                        </td>
+                                        <td>
+                                            <div class="slds-truncate">{item.Quantity__c}</div>
+                                        </td>
+                                        <td>
+                                            <div class="slds-truncate">{item.formattedUnitPrice}</div>
+                                        </td>
+                                        <td>
+                                            <div class="slds-truncate slds-text-color_success">
+                                                {item.formattedLineTotal}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <lightning-button-menu 
+                                                alternative-text="Show menu"
+                                                icon-size="x-small">
+                                                <lightning-menu-item 
+                                                    value="edit" 
+                                                    label="Edit"
+                                                    data-item-id={item.Id}
+                                                    onclick={handleLineItemAction}>
+                                                </lightning-menu-item>
+                                                <lightning-menu-item 
+                                                    value="delete" 
+                                                    label="Delete"
+                                                    data-item-id={item.Id}
+                                                    onclick={handleLineItemAction}>
+                                                </lightning-menu-item>
+                                            </lightning-button-menu>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                
+                <template if:false={hasLineItems}>
+                    <div class="slds-section__content slds-text-align_center slds-p-around_large">
+                        <lightning-icon 
+                            icon-name="utility:inbox" 
+                            size="large" 
+                            class="slds-m-bottom_small">
+                        </lightning-icon>
+                        <p class="slds-text-body_regular slds-text-color_weak">
+                            No line items yet. Add your first line item to get started.
+                        </p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Total Section -->
+            <div class="total-section">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-2">
+                        <p class="slds-text-body_regular">
+                            <strong>Invoice Summary</strong>
+                        </p>
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            {lineItemCount} items
+                        </p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                        <p class="slds-text-heading_medium slds-text-color_success">
+                            Total: {formattedTotal}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+
+        <!-- Error Message -->
+        <template if:true={error}>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_error slds-m-around_small">
+                <span class="slds-assistive-text">Error</span>
+                <h2>Error: {error}</h2>
+            </div>
+        </template>
+    </div>
+
+    <!-- Add Line Item Modal -->
+    <template if:true={showAddLineItemModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Add Line Item</h2>
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" size="medium"></lightning-icon>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-input
+                        label="Product Name"
+                        value={newLineItem.productName}
+                        onchange={handleLineItemFieldChange}
+                        data-field="productName"
+                        required>
+                    </lightning-input>
+                    <lightning-input
+                        label="Quantity"
+                        type="number"
+                        step="0.01"
+                        value={newLineItem.quantity}
+                        onchange={handleLineItemFieldChange}
+                        data-field="quantity"
+                        required>
+                    </lightning-input>
+                    <lightning-input
+                        label="Unit Price"
+                        type="number"
+                        step="0.01"
+                        formatter="currency"
+                        value={newLineItem.unitPrice}
+                        onchange={handleLineItemFieldChange}
+                        data-field="unitPrice"
+                        required>
+                    </lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button 
+                        variant="neutral" 
+                        label="Cancel" 
+                        onclick={closeModal}>
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Add Line Item" 
+                        onclick={addLineItem}
+                        disabled={addLineItemDisabled}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Status Change Modal -->
+    <template if:true={showStatusModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Change Invoice Status</h2>
+                    <button class="slds-button slds-button_icon slds-modal__close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" size="medium"></lightning-icon>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox
+                        label="New Status"
+                        value={selectedNewStatus}
+                        options={statusOptions}
+                        onchange={handleStatusChange}
+                        required>
+                    </lightning-combobox>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button 
+                        variant="neutral" 
+                        label="Cancel" 
+                        onclick={closeModal}>
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Update Status" 
+                        onclick={updateStatus}
+                        disabled={updateStatusDisabled}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

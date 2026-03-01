@@ -1,0 +1,56 @@
+.project-detail-container {
+    --task-progress-color: #0070d2;
+    --badge-text-color: #ffffff;
+}
+
+.project-details-card, .task-list-container {
+    border-radius: 0.25rem;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.field-label {
+    color: #706e6b;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    margin-bottom: 0.125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.0625rem;
+    font-weight: 700;
+}
+
+.field-value {
+    color: rgb(22, 50, 92);
+    font-weight: 400;
+}
+
+.status-badge, .priority-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 15rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: #0070d2;
+    color: var(--badge-text-color);
+    display: inline-block;
+}
+
+.priority-badge {
+    background-color: #e56798;
+}
+
+.task-progress .slds-progress-bar__value {
+    background: var(--task-progress-color);
+    transition: width 0.4s ease-in-out;
+}
+
+.task-datatable {
+    border: 1px solid #d8dde6;
+    border-radius: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .slds-modal__container {
+        margin: 0 0.5rem;
+        width: auto;
+    }
+}

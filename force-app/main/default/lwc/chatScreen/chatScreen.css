@@ -1,0 +1,139 @@
+/* --- FAB Styling (Minimal) --- */
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9000; /* Below modal backdrop */
+}
+
+.fab-button {
+    /* Increase size slightly */
+    --sds-c-button-icon-large-size: 3.5rem;
+     /* Add subtle shadow consistent with SLDS */
+    box-shadow: 0 2px 3px 0 rgba(0, 0, 0, 0.16);
+    border-radius: 50%; /* Ensure it's circular */
+}
+
+.fab-button:hover {
+    /* Enhance shadow on hover */
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Hide FAB container when modal is open */
+.fab-container.slds-hide {
+    display: none;
+}
+
+/* --- Modal Content Area --- */
+.slds-modal__content {
+    /* Remove default padding to allow chat history to fill space */
+    padding: 0;
+    /* Set a height for the chat area and make it scrollable */
+    height: 60vh; /* Adjust as needed */
+    display: flex; /* Use flexbox for layout */
+    flex-direction: column; /* Stack children vertically */
+}
+
+.chat-history-container {
+    flex-grow: 1; /* Allow this container to grow */
+    overflow-y: auto; /* Enable vertical scrolling */
+    background-color: var(--slds-g-color-neutral-base-100, #f3f3f3); /* Slightly off-white background */
+    padding: var(--slds-g-spacing-medium); /* Add padding inside scrollable area */
+}
+
+/* Custom Scrollbar (Optional - Uses Webkit standard styling) */
+.chat-history-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-history-container::-webkit-scrollbar-track {
+    background: var(--slds-g-color-neutral-base-95, #e8e8e8);
+    border-radius: 4px;
+}
+
+.chat-history-container::-webkit-scrollbar-thumb {
+    background-color: var(--slds-g-color-neutral-base-60, #999);
+    border-radius: 4px;
+    border: 2px solid var(--slds-g-color-neutral-base-95, #e8e8e8);
+}
+
+/* --- Chat Message Styling --- */
+/* Add spacing between chat list items */
+.slds-chat-listitem {
+    margin-bottom: var(--slds-g-spacing-small);
+}
+
+/* Style User (Outbound) Messages */
+.slds-chat-listitem_outbound .slds-chat-message__body {
+    background-color: var(--slds-g-color-messaging-bubble-sent-alt, #dcf8c6); /* Standard SLDS user bubble color */
+    border-radius: var(--slds-g-radius-large) var(--slds-g-radius-large) 0 var(--slds-g-radius-large);
+    /* Ensure text color is readable */
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+/* Style Assistant (Inbound) Messages */
+.slds-chat-listitem_inbound .slds-chat-message__body {
+    background-color: var(--slds-g-color-neutral-base-100, #ffffff); /* Standard SLDS assistant bubble color */
+    border: 1px solid var(--slds-g-color-neutral-base-85, #d8d8d8);
+    border-radius: var(--slds-g-radius-large) var(--slds-g-radius-large) var(--slds-g-radius-large) 0;
+     /* Ensure text color is readable */
+    color: var(--slds-g-color-neutral-base-10, #181818);
+}
+
+/* Style Error Messages (Inbound) */
+.slds-chat-listitem_inbound.chat-message-error .slds-chat-message__body {
+    background-color: var(--slds-g-color-error-base-95, #feeded); /* Light error background */
+    border: 1px solid var(--slds-g-color-error-base-80, #ea9aa1); /* Error border */
+    color: var(--slds-g-color-error-base-40, #c23934); /* Error text color */
+}
+
+.chat-message-text {
+     /* Ensure text color inherits correctly from the bubble */
+    color: inherit;
+    font-size: var(--slds-g-font-size-3, 0.875rem); /* Standard body text size */
+    word-wrap: break-word; /* Prevent long words from overflowing */
+    white-space: pre-wrap; /* Respect whitespace and newlines */
+}
+
+/* Style code blocks within the rich text */
+.chat-message-text pre {
+    background-color: var(--slds-g-color-neutral-base-95, #e8e8e8); /* Slightly different background for code */
+    border: 1px solid var(--slds-g-color-neutral-base-85, #d8d8d8);
+    padding: var(--slds-g-spacing-x-small) var(--sds-g-spacing-small);
+    border-radius: var(--slds-g-radius-small);
+    font-family: var(--slds-g-font-family-monospace);
+    font-size: var(--slds-g-font-size-2, 0.8125rem);
+    white-space: pre-wrap; /* Ensure wrapping within code blocks */
+    word-wrap: break-word;
+    margin-top: var(--slds-g-spacing-x-small);
+    color: var(--slds-g-color-neutral-base-10, #181818); /* Ensure code text is dark */
+    max-height: 300px; /* Limit height */
+    overflow: auto; /* Add scroll if needed */
+}
+
+/* Style inline code */
+.chat-message-text code {
+    background-color: var(--slds-g-color-neutral-base-95, #e8e8e8);
+    padding: 0.1em 0.3em;
+    border-radius: var(--slds-g-radius-small);
+    font-family: var(--slds-g-font-family-monospace);
+    font-size: 0.9em; /* Slightly smaller than surrounding text */
+    color: inherit; /* Inherit color but background provides contrast */
+}
+
+
+/* --- Footer Input Styling --- */
+.slds-modal__footer {
+    /* Standard SLDS footer padding is usually sufficient */
+    /* background-color: var(--slds-g-color-neutral-base-95, #f3f3f3); Optional: slightly different footer background */
+}
+
+.chat-input lightning-textarea .slds-textarea {
+    min-height: 40px; /* Ensure a minimum height */
+    max-height: 120px; /* Prevent excessive growth */
+}
+
+/* Ensure button aligns nicely with textarea */
+.execute-button {
+    align-self: flex-end; /* Align to bottom if textarea grows */
+}

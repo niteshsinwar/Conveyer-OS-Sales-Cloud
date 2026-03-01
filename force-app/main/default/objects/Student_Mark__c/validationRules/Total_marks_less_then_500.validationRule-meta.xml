@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_marks_less_then_500</fullName>
+    <active>true</active>
+    <errorConditionFormula>Student_Result__r.Total_Marks__c +  Total_Marks__c &gt; 500</errorConditionFormula>
+    <errorDisplayField>Total_Marks__c</errorDisplayField>
+    <errorMessage>Sum of total marks related to one student cannot exceed 500.</errorMessage>
+</ValidationRule>

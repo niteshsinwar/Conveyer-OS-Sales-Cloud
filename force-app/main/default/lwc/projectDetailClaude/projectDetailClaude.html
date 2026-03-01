@@ -1,0 +1,278 @@
+<template>
+    <div class="slds-is-relative project-detail-container">
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <lightning-spinner 
+                alternative-text="Loading..." 
+                size="large" 
+                class="slds-spinner_modal"
+                variant="brand"
+            ></lightning-spinner>
+        </template>
+        
+        <!-- Project Load Error -->
+        <template if:true={error}>
+            <div class="slds-illustration slds-illustration_small slds-m-vertical_medium">
+                <div class="slds-illustration__svg">
+                    <lightning-icon icon-name="utility:error" alternative-text="Error" size="medium" class="slds-m-bottom_small"></lightning-icon>
+                </div>
+                <div class="slds-text-longform">
+                    <h3 class="slds-text-heading_medium slds-text-color_error">Error loading project details</h3>
+                    <p class="slds-text-body_regular">{error}</p>
+                    <lightning-button 
+                        label="Retry" 
+                        variant="brand" 
+                        onclick={refreshTasks} 
+                        class="slds-m-top_small"
+                    ></lightning-button>
+                </div>
+            </div>
+        </template>
+        
+        <!-- Project Content -->
+        <template if:true={project}>
+            <lightning-card title={projectName} icon-name="standard:planogram">
+                <div>claude</div>
+                <div slot="actions">
+                    <lightning-button-group>
+                        <lightning-button 
+                            label="New Task" 
+                            variant="brand" 
+                            icon-name="utility:add"
+                            icon-position="left"
+                            onclick={openCreateModal}
+                        ></lightning-button>
+                    </lightning-button-group>
+                </div>
+                
+                <div class="slds-p-around_medium">
+                    <lightning-layout multiple-rows>
+                        
+                        <!-- Project Details + Task‐Progress -->
+                        <lightning-layout-item 
+                            size="12" 
+                            medium-device-size="5" 
+                            large-device-size="4"
+                            padding="around-small"
+                        >
+                            <div class="slds-box slds-box_shadow project-details-card">
+                                <h3 class="slds-text-heading_small slds-m-bottom_medium">Project Information</h3>
+                                
+                                <div class="field-group">
+                                    <div class="slds-grid slds-wrap">
+                                        <div class="slds-col slds-size_full">
+                                            <p class="field-label">Description</p>
+                                            <p class="field-value slds-text-body_regular slds-m-bottom_small" aria-label="Description">
+                                                {description}
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small">
+                                            <p class="field-label">Start Date</p>
+                                            <p class="field-value" aria-label="Start Date">
+                                                <lightning-formatted-date-time 
+                                                    value={startDate}
+                                                    year="numeric"
+                                                    month="short"
+                                                    day="2-digit"
+                                                ></lightning-formatted-date-time>
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small">
+                                            <p class="field-label">End Date</p>
+                                            <p class="field-value" aria-label="End Date">
+                                                <lightning-formatted-date-time 
+                                                    value={endDate}
+                                                    year="numeric"
+                                                    month="short" 
+                                                    day="2-digit"
+                                                ></lightning-formatted-date-time>
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="slds-col slds-size_1-of-2 slds-p-right_x-small slds-m-top_small">
+                                            <p class="field-label">Status</p>
+                                            <div class="slds-m-top_xx-small">
+                                                <span class="status-badge slds-badge" aria-label="Status">
+                                                    {status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="slds-col slds-size_1-of-2 slds-p-left_x-small slds-m-top_small">
+                                            <p class="field-label">Priority</p>
+                                            <div class="slds-m-top_xx-small">
+                                                <span class="priority-badge slds-badge" aria-label="Priority">
+                                                    {priority}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Timeline / Days Remaining -->
+                                <div class="slds-m-top_medium">
+                                    <p class="field-label">Project Timeline</p>
+                                    <div class="slds-grid slds-grid_align-spread slds-m-top_xx-small">
+                                        <div class="slds-text-body_small slds-text-color_weak">
+                                            <lightning-formatted-date-time 
+                                                value={startDate} 
+                                                year="numeric" 
+                                                month="short" 
+                                                day="2-digit"
+                                            ></lightning-formatted-date-time>
+                                        </div>
+                                        <div class="slds-text-align_right slds-text-body_small slds-text-color_weak">
+                                            <lightning-formatted-date-time 
+                                                value={endDate} 
+                                                year="numeric" 
+                                                month="short" 
+                                                day="2-digit"
+                                            ></lightning-formatted-date-time>
+                                        </div>
+                                    </div>
+                                    <div class="slds-progress-bar slds-progress-bar_medium slds-m-top_xx-small" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" role="progressbar">
+                                        <span class="slds-progress-bar__value" style="width:50%"></span>
+                                    </div>
+                                    <p class="slds-text-body_small slds-text-align_right slds-m-top_xx-small slds-text-color_success" aria-label="Days Remaining">
+                                        {daysRemainingText}
+                                    </p>
+                                </div>
+                                
+                                <!-- Task‐Completion Progress -->
+                                <template if:true={hasTasks}>
+                                    <div class="slds-m-top_large">
+                                        <div class="slds-grid slds-grid_align-spread">
+                                            <p class="field-label">Task Completion</p>
+                                            <p class="slds-text-body_small">{completedTasks} of {totalTasks}</p>
+                                        </div>
+                                        <lightning-progress-bar 
+                                            value={taskCompletionPercentage} 
+                                            size="large"
+                                            class="task-progress"
+                                            aria-label="Task completion progress"
+                                        ></lightning-progress-bar>
+                                        <p class="slds-text-body_small slds-text-align_right slds-m-top_xx-small">
+                                            <strong>{taskCompletionPercentage}%</strong> complete
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                        
+                        <!-- Tasks Table -->
+                        <lightning-layout-item 
+                            size="12" 
+                            medium-device-size="7" 
+                            large-device-size="8"
+                            padding="around-small"
+                        >
+                            <div class="slds-box slds-box_shadow task-list-container">
+                                <h3 class="slds-text-heading_small slds-m-bottom_medium">Task Management</h3>
+                                
+                                <!-- Task Load Error -->
+                                <template if:true={taskError}>
+                                    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_warning" role="alert">
+                                        <span class="slds-assistive-text">Warning</span>
+                                        <lightning-icon icon-name="utility:warning" alternative-text="Warning" size="small"></lightning-icon>
+                                        <h2 class="slds-m-left_small">Error loading tasks</h2>
+                                        <div class="slds-notify__content">
+                                            <p>{taskError}</p>
+                                        </div>
+                                        <div class="slds-notify__close">
+                                            <lightning-button-icon 
+                                                icon-name="utility:refresh" 
+                                                variant="bare" 
+                                                alternative-text="Refresh" 
+                                                title="Refresh" 
+                                                onclick={refreshTasks}
+                                            ></lightning-button-icon>
+                                        </div>
+                                    </div>
+                                </template>
+                                
+                                <!-- Task Datatable -->
+                                <template if:true={tasks}>
+                                    <div class="slds-m-top_small">
+                                        <lightning-datatable
+                                            key-field="Id"
+                                            data={tasks}
+                                            columns={columns}
+                                            hide-checkbox-column
+                                            onrowaction={handleRowAction}
+                                            class="task-datatable"
+                                            suppress-bottom-bar
+                                            resize-column-disabled
+                                            min-column-width="150"
+                                            aria-label="Project Tasks"
+                                        ></lightning-datatable>
+                                    </div>
+                                </template>
+                                
+                                <!-- No Tasks Illustration -->
+                                <template if:false={hasTasks}>
+                                    <div class="slds-illustration slds-illustration_small slds-p-around_medium">
+                                        <div class="slds-illustration__svg">
+                                            <lightning-icon icon-name="utility:task" size="large"></lightning-icon>
+                                        </div>
+                                        <div class="slds-text-longform slds-text-align_center slds-m-top_small">
+                                            <h3 class="slds-text-heading_medium">No tasks yet</h3>
+                                            <p class="slds-text-body_regular slds-m-top_x-small">
+                                                Get started by adding tasks to track work on this project
+                                            </p>
+                                            <lightning-button 
+                                                class="slds-m-top_small"
+                                                label="Add First Task" 
+                                                variant="neutral" 
+                                                onclick={openCreateModal}
+                                            ></lightning-button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </div>
+            </lightning-card>
+        </template>
+        
+        <!-- Task Modal -->
+        <template if:true={isModalOpen}>
+            <section 
+                role="dialog" 
+                tabindex="-1" 
+                aria-labelledby="modal-heading" 
+                aria-modal="true" 
+                aria-describedby="modal-content"
+                class="slds-modal slds-fade-in-open slds-modal_medium"
+            >
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button 
+                            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" 
+                            onclick={closeModal}
+                            title="Close"
+                        >
+                            <lightning-icon icon-name="utility:close" size="small" alternative-text="Close"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading" class="slds-text-heading_medium">{modalHeader}</h2>
+                    </header>
+                    
+                    <div id="modal-content" class="slds-modal__content slds-p-around_medium">
+                        <c-task-modal
+                            task={selectedTask}
+                            project-id={recordId}
+                            onsuccess={handleTaskModalSuccess}
+                            onerror={handleTaskModalError}
+                            onclose={closeModal}
+                        ></c-task-modal>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+</template>

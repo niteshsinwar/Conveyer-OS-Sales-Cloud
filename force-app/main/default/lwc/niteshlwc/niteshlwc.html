@@ -1,0 +1,26 @@
+<template>
+    <lightning-card title="Enhanced Nitesh Manager">
+        <div class="slds-p-around_medium">
+            <div class="slds-box slds-m-bottom_medium">
+                <h3>Create New Record</h3>
+                <lightning-input label="Field Value" value={fieldValue} onchange={handleChange}></lightning-input>
+                <lightning-button label="Create" onclick={handleCreate} variant="brand" class="slds-m-top_small"></lightning-button>
+            </div>
+            
+            <div class="slds-box slds-m-bottom_medium">
+                <p><strong>Total Records: {recordCount}</strong></p>
+            </div>
+            
+            <div class="slds-m-top_medium">
+                <template if:true={records}>
+                    <template for:each={records} for:item="record">
+                        <div key={record.Id} class="slds-box slds-m-bottom_small">
+                            <p><strong>{record.Name}</strong></p>
+                            <p>Field: {record.NiteshField__c}</p>
+                        </div>
+                    </template>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

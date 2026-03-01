@@ -1,0 +1,153 @@
+<template>
+    <div class="slds-is-relative">
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <lightning-spinner 
+                alternative-text="Loading..." 
+                size="large" 
+                class="slds-spinner_modal"
+            ></lightning-spinner>
+        </template>
+        
+        <!-- Project Load Error -->
+        <template if:true={error}>
+            <div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+                <span class="slds-assistive-text">Error</span>
+                <h2>Error loading project details</h2>
+                <p>{error}</p>
+            </div>
+        </template>
+        
+        <!-- Project Card -->
+        <template if:true={project}>
+            <lightning-card title={projectName} icon-name="standard:planogram">
+                <div>Normal</div>
+                <lightning-button 
+                    slot="actions" 
+                    label="New Task" 
+                    variant="brand" 
+                    onclick={openCreateModal}
+                ></lightning-button>
+                
+                <div class="slds-p-around_medium">
+                    <lightning-layout multiple-rows>
+                        
+                        <!-- Project Details + Task‐Progress -->
+                        <lightning-layout-item 
+                            size="12" 
+                            medium-device-size="5" 
+                            padding="around-small"
+                        >
+                            <div class="slds-box slds-theme_default">
+                                <p><strong>Description:</strong> {description}</p>
+                                <p>
+                                    <strong>Start Date:</strong> 
+                                    <lightning-formatted-date-time value={startDate}></lightning-formatted-date-time>
+                                </p>
+                                <p>
+                                    <strong>End Date:</strong> 
+                                    <lightning-formatted-date-time value={endDate}></lightning-formatted-date-time>
+                                </p>
+                                <p><strong>Status:</strong> {status}</p>
+                                <p><strong>Priority:</strong> {priority}</p>
+                                
+                                <!-- Task‐Completion Progress -->
+                                <template if:true={hasTasks}>
+                                    <div class="slds-m-top_medium">
+                                        <p><strong>Tasks Completed:</strong></p>
+                                        <lightning-progress-bar 
+                                            value={taskCompletionPercentage} 
+                                            size="medium"
+                                        ></lightning-progress-bar>
+                                        <p class="slds-text-body_small slds-m-top_xx-small">
+                                            {completedTasks} of {totalTasks} task(s) complete.
+                                        </p>
+                                        <p class="slds-text-body_small">
+                                            {daysRemainingText}
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                        
+                        <!-- Tasks Table -->
+                        <lightning-layout-item 
+                            size="12" 
+                            medium-device-size="7" 
+                            padding="around-small"
+                        >
+                            <div class="slds-box slds-theme_default">
+                                <!-- Task Load Error -->
+                                <template if:true={taskError}>
+                                    <div class="slds-notify slds-notify_alert slds-theme_warning" role="alert">
+                                        <span class="slds-assistive-text">Warning</span>
+                                        <h2>Error loading tasks</h2>
+                                        <p>{taskError}</p>
+                                    </div>
+                                </template>
+                                
+                                <!-- Task Datatable -->
+                                <template if:true={tasks}>
+                                    <lightning-datatable
+                                        key-field="Id"
+                                        data={tasks}
+                                        columns={columns}
+                                        hide-checkbox-column
+                                        onrowaction={handleRowAction}
+                                    ></lightning-datatable>
+                                </template>
+                                
+                                <!-- No Tasks Illustration -->
+                                <template if:false={tasks}>
+                                    <div class="slds-illustration slds-illustration_small">
+                                        <div class="slds-text-longform">
+                                            <h3 class="slds-text-heading_medium">No tasks yet</h3>
+                                            <p class="slds-text-body_regular">
+                                                Add tasks to track work on this project
+                                            </p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </div>
+            </lightning-card>
+        </template>
+        
+        <!-- Task Modal -->
+        <template if:true={isModalOpen}>
+            <section 
+                role="dialog" 
+                tabindex="-1" 
+                aria-modal="true" 
+                class="slds-modal slds-fade-in-open"
+            >
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button 
+                            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" 
+                            onclick={closeModal}
+                        >
+                            <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 class="slds-text-heading_medium">{modalHeader}</h2>
+                    </header>
+                    
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <c-task-modal
+                            task={selectedTask}
+                            project-id={recordId}
+                            onsuccess={handleTaskModalSuccess}
+                            onerror={handleTaskModalError}
+                            onclose={closeModal}
+                        ></c-task-modal>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </div>
+</template>

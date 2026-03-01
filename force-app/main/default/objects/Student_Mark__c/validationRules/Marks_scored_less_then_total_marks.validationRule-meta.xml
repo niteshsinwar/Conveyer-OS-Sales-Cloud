@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Marks_scored_less_then_total_marks</fullName>
+    <active>true</active>
+    <errorConditionFormula>Marks_Scored__c &gt; Total_Marks__c</errorConditionFormula>
+    <errorDisplayField>Marks_Scored__c</errorDisplayField>
+    <errorMessage>Marks scored should be less then or equal to total marks</errorMessage>
+</ValidationRule>

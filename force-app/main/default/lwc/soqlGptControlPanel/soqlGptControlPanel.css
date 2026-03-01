@@ -1,0 +1,167 @@
+/* Brand Colors */
+.brand-title {
+    background: linear-gradient(135deg, #00A1E0 0%, #0070D2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Wizard Screens */
+.wizard-screen {
+    min-height: 400px;
+    padding: 1rem;
+}
+
+.wizard-screen h2 {
+    color: #0070D2;
+}
+
+/* Field List with Scroll */
+.field-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+}
+
+/* SOQL Container */
+.soql-container {
+    position: relative;
+}
+
+.soql-code {
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.875rem;
+    color: #ffffff;
+    padding: 1rem;
+    background-color: #16325c;
+    border-radius: 0.25rem;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 400px;
+    max-height: 500px;
+    padding: 1rem;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+}
+
+/* Table Container */
+.table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+}
+
+/* Success Screen */
+.slds-text-align_center {
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wizard-screen {
+        min-height: 300px;
+        padding: 0.5rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+    
+    .field-list {
+        max-height: 200px;
+    }
+}
+
+/* Loading States */
+.slds-spinner_container {
+    z-index: 9999;
+}
+
+.slds-align_absolute-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    width: 100%;
+}
+
+.slds-m-vertical_large {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Progress Indicator */
+lightning-progress-indicator {
+    margin-bottom: 1.5rem;
+}
+
+/* Box Themes */
+.slds-theme_info {
+    background-color: #d8edff;
+    border-left: 4px solid #0070d2;
+}
+
+.slds-theme_success {
+    background-color: #d8f0d6;
+    border-left: 4px solid #04844b;
+}
+
+.slds-theme_warning {
+    background-color: #fef7e7;
+    border-left: 4px solid #fe9339;
+}
+
+/* Checkbox Groups */
+lightning-input[type="checkbox"] {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Button Groups */
+.slds-text-align_center lightning-button {
+    margin: 0 0.25rem;
+}
+
+/* Card Body */
+.slds-card__body_inner {
+    padding: 1rem;
+}
+
+/* Connection Status */
+.slds-box {
+    padding: 0.75rem;
+}
+
+/* Icons */
+.slds-icon_container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Media Objects */
+.slds-media_center {
+    align-items: center;
+}
+
+/* Completion Screen */
+.wizard-screen lightning-icon[variant="success"] {
+    color: #04844b;
+}
+
+.wizard-screen h2.slds-text-heading_large {
+    color: #04844b;
+    font-weight: bold;
+}

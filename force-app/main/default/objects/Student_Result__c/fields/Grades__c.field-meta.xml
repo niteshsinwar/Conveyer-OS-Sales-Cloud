@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Grades__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF(
+    Overall_Scores__c &gt; 90, &quot;A+&quot;,
+    IF(
+        Overall_Scores__c &gt;= 80, &quot;A&quot;,
+        IF(
+            Overall_Scores__c &gt;= 70, &quot;B+&quot;,
+            IF(
+                Overall_Scores__c &gt;= 60, &quot;B&quot;,
+                IF(
+                    Overall_Scores__c &gt;= 50, &quot;C&quot;,
+                    &quot;F&quot;
+                )
+            )
+        )
+    )
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Grades</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

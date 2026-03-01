@@ -1,0 +1,39 @@
+.invoice-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.line-item-row {
+    border-bottom: 1px solid #e0e5ee;
+    padding: 0.5rem 0;
+}
+
+.line-item-row:hover {
+    background-color: #f3f3f3;
+}
+
+.total-section {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e5ee;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-draft { background-color: #f0f0f0; color: #666; }
+.status-sent { background-color: #e3f2fd; color: #1976d2; }
+.status-paid { background-color: #e8f5e8; color: #388e3c; }
+.status-overdue { background-color: #ffebee; color: #d32f2f; }
+.status-cancelled { background-color: #f0f0f0; color: #666; }

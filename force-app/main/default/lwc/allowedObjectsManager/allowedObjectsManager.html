@@ -1,0 +1,183 @@
+<template>
+    <div class="slds-var-p-around_large">
+        <lightning-card title="Allowed Objects & Fields Manager" icon-name="standard:settings">
+            <lightning-button
+                label="Add New Configuration"
+                slot="actions"
+                onclick={handleAddNew}
+                variant="brand">
+            </lightning-button>
+
+            <div class="slds-card__body slds-card__body_inner">
+                <template if:true={isLoading}>
+                    <div class="slds-is-relative slds-m-vertical_large">
+                        <lightning-spinner alternative-text="Loading configurations..." size="medium"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <template if:true={allowedConfigs.length}>
+                        <lightning-datatable
+                            key-field="recordId"
+                            data={allowedConfigs}
+                            columns={columns}
+                            onrowaction={handleRowAction}
+                            hide-checkbox-column
+                            sorted-by={sortedBy}
+                            sorted-direction={sortDirection}
+                            onsort={handleSort}
+                            class="slds-table_bordered slds-table_col-bordered">
+                        </lightning-datatable>
+                    </template>
+                    <template if:false={allowedConfigs.length}>
+                        <div class="slds-align_absolute-center slds-text-color_weak slds-m-vertical_large slds-p-vertical_large" style="min-height: 150px;">
+                            <lightning-icon icon-name="utility:info" size="small" class="slds-m-right_small"></lightning-icon>
+                            No allowed object configurations found. Click "Add New Configuration" to get started.
+                        </div>
+                    </template>
+                </template>
+            </div>
+            <footer slot="footer" class="slds-text-align_center slds-text-color_weak">
+                Manage which objects and fields are accessible for external integrations or processes.
+            </footer>
+        </lightning-card>
+    </div>
+
+    <template if:true={showModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-config" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" variant="inverse" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-config" class="slds-modal__title slds-hyphenate">{modalTitle}</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-config">
+                    <lightning-combobox
+                        name="objectApiName"
+                        label="Select SObject"
+                        value={currentConfig.objectApiName}
+                        options={sObjectOptions}
+                        onchange={handleSObjectChange}
+                        required
+                        disabled={isEditMode}
+                        class="slds-m-bottom_medium"
+                        placeholder="-- Select Object --"
+                        message-when-value-missing="SObject selection is required.">
+                    </lightning-combobox>
+
+                    <template if:true={currentConfig.objectApiName}>
+                         <p class="slds-m-bottom_xx-small">Select fields for <strong>{selectedObjectLabel}</strong>:</p>
+                        <lightning-dual-listbox
+                            name="allowedFields"
+                            label="Fields"
+                            source-label="Available Fields"
+                            selected-label="Selected Fields"
+                            options={fieldOptions}
+                            value={selectedFields}
+                            onchange={handleFieldSelectionChange}
+                            required
+                            message-when-value-missing="At least one field must be selected."
+                            class="slds-m-bottom_medium"
+                            disable-reordering>
+                        </lightning-dual-listbox>
+                    </template>
+                    <template if:false={currentConfig.objectApiName}>
+                        <p class="slds-text-color_weak slds-m-bottom_medium slds-text-align_center">
+                            <lightning-icon icon-name="utility:info_alt" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                            Select an SObject above to see and choose its available fields.
+                        </p>
+                    </template>
+
+                    <lightning-textarea
+                        name="description"
+                        label="Description"
+                        value={currentConfig.description}
+                        onchange={handleInputChange}
+                        maxlength="255"
+                        class="slds-m-bottom_medium">
+                    </lightning-textarea>
+
+                    <lightning-textarea
+                        name="technicalNotes"
+                        label="Technical Notes (Optional)"
+                        value={currentConfig.technicalNotes}
+                        onchange={handleInputChange}
+                        maxlength="1000"
+                        class="slds-m-bottom_medium">
+                    </lightning-textarea>
+
+                    <lightning-input
+                        type="checkbox"
+                        label="Is Active"
+                        name="isActive"
+                        checked={currentConfig.isActive}
+                        onchange={handleInputChange}
+                        class="slds-m-bottom_medium">
+                    </lightning-input>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeModal} class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button label="Save Configuration" variant="brand" onclick={handleSave} disabled={isSaving}>
+                         <lightning-spinner if:true={isSaving} alternative-text="Saving..." variant="brand" size="x-small"></lightning-spinner>
+                         <span if:false={isSaving}>Save</span>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showRecordModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="record-modal-heading" class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeRecordModal}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" variant="inverse" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="record-modal-heading" class="slds-modal__title slds-hyphenate">
+                        Viewing Records for: {selectedObjectConfigName}
+                    </h2>
+                    <p class="slds-m-top_x-small slds-text-color_weak">
+                        Showing {recordsFound} record(s) based on active configuration. (Max 200 records displayed)
+                    </p>
+                </header>
+
+                <div class="slds-modal__content slds-scrollable_y slds-p-around_medium" id="record-modal-content" style="min-height: 300px;">
+                    <template if:true={isLoadingRecords}>
+                        <div class="slds-is-relative" style="height:200px;">
+                             <lightning-spinner alternative-text="Loading records..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+                    
+                    <template if:false={isLoadingRecords}>
+                        <template if:true={recordsData.length}>
+                            <lightning-datatable
+                                key-field="Id"
+                                data={recordsData}
+                                columns={recordColumns}
+                                hide-checkbox-column
+                                show-row-number-column>
+                            </lightning-datatable>
+                        </template>
+                        <template if:false={recordsData.length}>
+                            <div class="slds-align_absolute-center slds-text-color_weak slds-m-vertical_large slds-p-vertical_large">
+                                <lightning-icon icon-name="utility:search" size="small" class="slds-m-right_small"></lightning-icon>
+                                No records found for {selectedObjectConfigName} with the current configuration.
+                            </div>
+                        </template>
+                    </template>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" variant="brand" onclick={closeRecordModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,117 @@
+<template>
+    <lightning-card title="Invoice Management System" icon-name="standard:invoice">
+        <div slot="actions">
+            <lightning-button 
+                variant="brand" 
+                label="New Invoice" 
+                onclick={openNewInvoiceModal}
+                icon-name="utility:add">
+            </lightning-button>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
+            <template for:each={statsCards} for:item="card">
+                <div key={card.title} class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="slds-box slds-theme_shade slds-text-align_center">
+                        <div class="slds-text-heading_large slds-text-color_success">{card.count}</div>
+                        <div class="slds-text-body_regular">{card.title}</div>
+                        <div class="slds-text-body_small slds-text-color_weak">
+                            Total: {card.total}
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <!-- Search and Filter -->
+        <div class="slds-grid slds-gutters slds-m-bottom_medium">
+            <div class="slds-col slds-size_1-of-2">
+                <lightning-input 
+                    type="search" 
+                    label="Search Invoices" 
+                    value={searchTerm}
+                    onchange={handleSearchChange}
+                    placeholder="Search by invoice number or customer...">
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2">
+                <lightning-combobox 
+                    name="statusFilter"
+                    label="Filter by Status"
+                    value={selectedStatus}
+                    options={statusOptions}
+                    onchange={handleStatusChange}>
+                </lightning-combobox>
+            </div>
+        </div>
+        
+        <!-- Invoice Data Table -->
+        <template if:true={invoices}>
+            <lightning-datatable
+                key-field="Id"
+                data={invoices}
+                columns={columns}
+                onrowaction={handleRowAction}
+                hide-checkbox-column="true">
+            </lightning-datatable>
+        </template>
+        
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading invoices..." size="medium"></lightning-spinner>
+        </template>
+        
+        <template if:true={error}>
+            <div class="slds-text-color_error slds-m-around_small">
+                Error: {error}
+            </div>
+        </template>
+    </lightning-card>
+    
+    <!-- New Invoice Modal -->
+    <template if:true={showNewInvoiceModal}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Create New Invoice</h2>
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close" size="medium"></lightning-icon>
+                    </button>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="slds-form-element">
+                        <lightning-record-picker
+                            label="Customer Account"
+                            placeholder="Select an account"
+                            object-api-name="Account"
+                            value={selectedAccountId}
+                            onchange={handleAccountChange}>
+                        </lightning-record-picker>
+                    </div>
+                    <div class="slds-form-element slds-m-top_medium">
+                        <lightning-input
+                            label="Invoice Number"
+                            value={newInvoiceNumber}
+                            onchange={handleInvoiceNumberChange}
+                            required>
+                        </lightning-input>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button 
+                        variant="neutral" 
+                        label="Cancel" 
+                        onclick={closeModal}>
+                    </lightning-button>
+                    <lightning-button 
+                        variant="brand" 
+                        label="Create Invoice" 
+                        onclick={createNewInvoice}
+                        disabled={createDisabled}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

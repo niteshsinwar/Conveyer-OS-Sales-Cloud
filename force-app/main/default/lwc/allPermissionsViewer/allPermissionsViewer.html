@@ -1,0 +1,54 @@
+<template>
+    <lightning-card title="All Profile & Permission Set Object Permissions Viewer" icon-name="standard:matrix">
+        <div class="slds-var-p-around_medium">
+
+            <template if:true={isLoading}>
+                <div class="slds-is-relative slds-var-m-vertical_large slds-align_absolute-center" style="height: 10rem;">
+                    <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                    <p class="slds-var-m-top_medium">Loading all permissions... This may take some time.</p>
+                </div>
+            </template>
+
+            <template if:true={errorMessage}>
+                 <div class="slds-box slds-theme_error slds-theme_alert-texture slds-var-m-bottom_small" role="alert">
+                    <lightning-icon icon-name="utility:error" alternative-text="Error!" variant="inverse" size="small" class="slds-var-m-right_x-small"></lightning-icon>
+                    <span>{errorMessage}</span>
+                    <p if:true={isLimitError} class="slds-var-m-top_x-small">
+                        Consider asking your administrator to implement an asynchronous solution (using Batch Apex) for viewing all permissions, as the synchronous method often exceeds Salesforce limits, especially when including Permission Sets.
+                    </p>
+                 </div>
+             </template>
+
+            <template if:true={permissionsData}>
+                 <p class="slds-text-body_small slds-var-m-bottom_medium">
+                    Displaying object permissions for <lightning-formatted-number value={profileAndPermSetCount}></lightning-formatted-number> Profiles & Permission Sets across relevant objects. Use column headers to sort.
+                </p>
+                <div class="slds-scrollable_x" style="width: 100%; overflow-x: auto;">
+                     <lightning-datatable
+                        key-field="id"
+                        data={permissionsData}
+                        columns={permissionsColumns}
+                        hide-checkbox-column
+                        show-row-number-column
+                        sorted-by={sortBy}
+                        sorted-direction={sortDirection}
+                        onsort={handleSort}
+                        resize-column-disabled> </lightning-datatable>
+                </div>
+                <template if:false={hasDataRows}>
+                      <p class="slds-var-m-top_medium slds-text-align_center">No specific object permission records found for the queried Profiles/Permission Sets and Objects.</p>
+                      <p class="slds-text-body_small slds-var-m-top_x-small slds-text-align_center">(Please check debug logs and ensure the running user has 'View Setup and Configuration' permission to read ObjectPermissions).</p>
+                 </template>
+            </template>
+
+            <template if:false={isLoading}>
+                 <template if:false={permissionsData}>
+                     <template if:false={errorMessage}>
+                         <p>No permission data loaded. Waiting for data...</p>
+                     </template>
+                 </template>
+             </template>
+
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,210 @@
+<template>
+    <div class="project-detail-container">
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner
+                    alternative-text="Loading..."
+                    size="large"
+                    variant="brand"
+                ></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error Handling -->
+        <template if:true={error}>
+            <div class="error-container">
+                <lightning-icon
+                    icon-name="utility:error"
+                    size="large"
+                    alternative-text="Error"
+                    class="error-icon"
+                ></lightning-icon>
+                <h3 class="error-heading">Error loading project details</h3>
+                <p class="error-message">{error}</p>
+                <lightning-button
+                    label="Retry"
+                    variant="neutral"
+                    onclick={refreshProject}
+                    class="retry-button"
+                ></lightning-button>
+            </div>
+        </template>
+
+        <!-- Project Details -->
+        <template if:true={project}>
+            <lightning-card title={projectName} icon-name="standard:planogram">
+                <div slot="actions">
+                    <lightning-button
+                        label="New Task"
+                        variant="brand"
+                        onclick={openCreateModal}
+                        class="new-task-button"
+                    ></lightning-button>
+                </div>
+
+                <div class="project-details">
+                    <lightning-layout multiple-rows>
+                        <!-- Project Overview -->
+                        <lightning-layout-item
+                            size="12"
+                            medium-device-size="5"
+                            padding="around-small"
+                        >
+                            <div class="project-overview">
+                                <h2 class="section-heading">Project Overview</h2>
+                                <p class="field">
+                                    <span class="field-label">Description:</span>
+                                    <span class="field-value">{description}</span>
+                                </p>
+                                <p class="field">
+                                    <span class="field-label">Start Date:</span>
+                                    <lightning-formatted-date-time
+                                        value={startDate}
+                                    ></lightning-formatted-date-time>
+                                </p>
+                                <p class="field">
+                                    <span class="field-label">End Date:</span>
+                                    <lightning-formatted-date-time
+                                        value={endDate}
+                                    ></lightning-formatted-date-time>
+                                </p>
+                                <p class="field">
+                                    <span class="field-label">Status:</span>
+                                    <span class="status-badge">{status}</span>
+                                </p>
+                                <p class="field">
+                                    <span class="field-label">Priority:</span>
+                                    <span class="priority-badge">{priority}</span>
+                                </p>
+
+                                <!-- Task Completion Progress -->
+                                <template if:true={hasTasks}>
+                                    <div class="task-progress">
+                                        <p class="progress-label">
+                                            Tasks Completed:
+                                        </p>
+                                        <lightning-progress-bar
+                                            value={taskCompletionPercentage}
+                                            size="medium"
+                                        ></lightning-progress-bar>
+                                        <p class="progress-summary">
+                                            {completedTasks} of {totalTasks} task(s) complete.
+                                        </p>
+                                        <p class="days-remaining">
+                                            {daysRemainingText}
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+
+                        <!-- Task List -->
+                        <lightning-layout-item
+                            size="12"
+                            medium-device-size="7"
+                            padding="around-small"
+                        >
+                            <div class="task-list">
+                                <h3 class="section-heading">Task Management</h3>
+
+                                <!-- Task Load Error -->
+                                <template if:true={taskError}>
+                                    <div class="task-error">
+                                        <lightning-icon
+                                            icon-name="utility:warning"
+                                            size="small"
+                                            alternative-text="Warning"
+                                            class="warning-icon"
+                                        ></lightning-icon>
+                                        <p class="task-error-message">{taskError}</p>
+                                        <lightning-button-icon
+                                            icon-name="utility:refresh"
+                                            alternative-text="Retry"
+                                            onclick={refreshTasks}
+                                            class="retry-icon"
+                                        ></lightning-button-icon>
+                                    </div>
+                                </template>
+
+                                <!-- Task Datatable -->
+                                <template if:true={tasks}>
+                                    <lightning-datatable
+                                        key-field="Id"
+                                        data={tasks}
+                                        columns={columns}
+                                        hide-checkbox-column
+                                        onrowaction={handleRowAction}
+                                        class="task-datatable"
+                                    ></lightning-datatable>
+                                </template>
+
+                                <!-- No Tasks Illustration -->
+                                <template if:false={hasTasks}>
+                                    <div class="no-tasks">
+                                        <lightning-icon
+                                            icon-name="utility:task"
+                                            size="large"
+                                            alternative-text="No Tasks"
+                                            class="no-tasks-icon"
+                                        ></lightning-icon>
+                                        <h3 class="no-tasks-heading">No tasks yet</h3>
+                                        <p class="no-tasks-message">
+                                            Add tasks to track work on this project.
+                                        </p>
+                                        <lightning-button
+                                            label="Add First Task"
+                                            variant="neutral"
+                                            onclick={openCreateModal}
+                                            class="add-task-button"
+                                        ></lightning-button>
+                                    </div>
+                                </template>
+                            </div>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </div>
+            </lightning-card>
+        </template>
+
+        <!-- Task Modal -->
+        <template if:true={isModalOpen}>
+            <section
+                role="dialog"
+                tabindex="-1"
+                aria-labelledby="modal-heading"
+                aria-modal="true"
+                class="modal"
+            >
+                <div class="modal-container">
+                    <header class="modal-header">
+                        <button
+                            class="close-button"
+                            onclick={closeModal}
+                            title="Close"
+                        >
+                            <lightning-icon
+                                icon-name="utility:close"
+                                size="small"
+                                alternative-text="Close"
+                            ></lightning-icon>
+                        </button>
+                        <h2 id="modal-heading" class="modal-title">
+                            {modalHeader}
+                        </h2>
+                    </header>
+                    <div class="modal-content">
+                        <c-task-modal
+                            task={selectedTask}
+                            project-id={recordId}
+                            onsuccess={handleTaskModalSuccess}
+                            onerror={handleTaskModalError}
+                            onclose={closeModal}
+                        ></c-task-modal>
+                    </div>
+                </div>
+            </section>
+            <div class="modal-backdrop"></div>
+        </template>
+    </div>
+</template>
