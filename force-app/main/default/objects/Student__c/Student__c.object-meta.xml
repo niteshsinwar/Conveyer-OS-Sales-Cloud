@@ -9,6 +9,6 @@
         <type>AutoNumber</type>
     </nameField>
     <deploymentStatus>Deployed</deploymentStatus>
-    <sharingModel>ReadWrite</sharingModel>
+    <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
