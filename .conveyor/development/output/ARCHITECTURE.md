@@ -4,24 +4,23 @@
 > Read it to understand current state. Update it after making changes.
 
 ## Last Updated
-- **Session**: 2026-05-14 11:55
+- **Session**: 2026-05-14 11:57
 - **Ticket**: CONOS-4
 
 ## Objects & Fields
 
-### Objects & Fields
-
-- **Student__c (Custom Object)**
-  - **Name Field**: Auto Number (ST-{0000})
-  - **Fields**:
-    - `First_Name__c` (Text)
-    - `Last_Name__c` (Text)
-    - `Date_of_Birth__c` (Date)
-    - `Email__c` (Email)
-    - `Phone__c` (Phone)
-    - `Enrollment_Date__c` (Date)
-    - `Status__c` (Picklist: Enrolled, Active, Graduated, Dropped)
-
+### Student__c
+*   **Purpose:** To store student information within the system.
+*   **API Name:** `Student__c`
+*   **Name Field:** `Student Name` (Auto Number: `ST-{0000}`)
+*   **Fields:**
+    *   `First_Name__c` (Text) - First name of the student.
+    *   `Last_Name__c` (Text) - Last name of the student.
+    *   `Date_of_Birth__c` (Date) - Student's date of birth.
+    *   `Email__c` (Email) - Student's email address.
+    *   `Phone__c` (Phone) - Student's phone number.
+    *   `Enrollment_Date__c` (Date) - Date the student enrolled.
+    *   `Status__c` (Picklist) - Current status of the student (Enrolled, Active, Graduated, Dropped).
 
 
 ## Apex Classes
