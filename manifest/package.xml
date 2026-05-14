@@ -7,7 +7,18 @@
     </types>
     <types>
         <members>Lead.Score__c</members>
+        <members>Student__c.First_Name__c</members>
+        <members>Student__c.Last_Name__c</members>
+        <members>Student__c.Date_of_Birth__c</members>
+        <members>Student__c.Email__c</members>
+        <members>Student__c.Phone__c</members>
+        <members>Student__c.Enrollment_Date__c</members>
+        <members>Student__c.Status__c</members>
         <name>CustomField</name>
+    </types>
+    <types>
+        <members>Student__c</members>
+        <name>CustomObject</name>
     </types>
     <version>59.0</version>
 </manifest>
